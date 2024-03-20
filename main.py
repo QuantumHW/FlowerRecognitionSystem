@@ -1,15 +1,9 @@
-"""
-@author: Huang Wen
-@file: main.py
-@time: 2024/2/20 17:51
-@desc:
-"""
-
 import os
 import cv2
 import sys
 import time
 import torch
+import sqlite3
 from ultralytics import YOLO
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import *
@@ -17,8 +11,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 from MainUI import Ui_MainWindow
+from login import Ui_loginWindow
 
-
+ui = None  # 缓存界面
+_user_name = ''
 _translate = QtCore.QCoreApplication.translate
 weights_path = None  # 存放权重文件的路径
 image_path = ''  # 存放待检测文件的路径
@@ -28,10 +24,9 @@ model = None  # 存放检测模型
 icon_start = QtGui.QIcon()
 icon_pause = QtGui.QIcon()
 
-
 cap = cv2.VideoCapture(0)
 
-my_class = {0: '雏菊', 1: '蒲公英', 2: '玫瑰花', 3: '向日葵', 4: 'champaka', 5: 'chitrak', 6: '五色梅',
+my_class = {0: '雏菊', 1: '蒲公英', 2: '玫瑰花', 3: '向日葵', 4: '黄玉兰', 5: 'chitrak', 6: '五色梅',
             7: '木槿花', 8: '金银花', 9: '梵天花', 10: '琴叶珊瑚', 11: '野牡丹',
             12: '万寿菊', 13: 'shankupushpam', 14: '彼岸花'}
 
@@ -45,7 +40,7 @@ def load_weights():
             weights_path = str(file_path[0])
             model = YOLO(weights_path)
         except Exception as e:
-            out_text('Exception:'+str(e))
+            out_text('Exception:' + str(e))
             return
         out_text('已加载权重：' + weights_path)
 
@@ -53,7 +48,7 @@ def load_weights():
 def open_file():
     global image_path, cap, playing, icon_pause
     file_path, _ = QFileDialog.getOpenFileNames(MainWindow, '选择需要检测的图像或视频', os.getcwd(),
-                                                        "所有文件(*);;图像文件(*.jpg;*.jpeg;*.png);;视频文件(*.mp4;*.avi)")
+                                                "所有文件(*);;图像文件(*.jpg;*.jpeg;*.png);;视频文件(*.mp4;*.avi)")
     if file_path:
         if not weights_path:
             out_text('文件加载失败，请先加载权重文件！')
@@ -74,7 +69,7 @@ def open_file():
                 else:
                     out_text('视频打开失败！')
             except Exception as e:
-                out_text('Exception:'+str(e))
+                out_text('Exception:' + str(e))
         else:
             try:
                 cap.release()  # 如果有正在播放的视频，释放掉
@@ -82,16 +77,16 @@ def open_file():
                 # img = cv2.imread(image_path)
                 out_text('已加载图像：' + image_path)
                 if weights_path:  # 如果加载了权重文件，则执行检测功能
-                    results = model(image_path)   # 调用检测模型
+                    results = model(image_path)  # 调用检测模型
 
                     boxes_temp = results[0].boxes
                     boxes = boxes_temp.xyxy.tolist()
                     names = boxes_temp.cls.tolist()
                     conf = boxes_temp.conf.tolist()
                     for i, box in enumerate(boxes):
-                        out_text('检测到：'+my_class[names[i]]
-                                 + '；位置坐标为：'+str(list(map(int, box)))
-                                 + '；置信度为：'+str(round(conf[i], 2)))
+                        out_text('检测到：' + my_class[names[i]]
+                                 + '；位置坐标为：' + str(list(map(int, box)))
+                                 + '；置信度为：' + str(round(conf[i], 2)))
 
                     img = results[0].plot()
                     cur_frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -106,7 +101,7 @@ def open_file():
                     ui.label_show.setAlignment(Qt.AlignCenter)
                     ui.label_show.setPixmap(pixmap)
             except Exception as e:
-                out_text('Exception:'+str(e))
+                out_text('Exception:' + str(e))
 
 
 def open_camera():
@@ -171,7 +166,7 @@ def show_pic():
             # 对每一帧进行检测
             with torch.no_grad():
                 results = model(img)  # 调用检测模型
-                img = results[0].plot()   # 调用检测模型
+                img = results[0].plot()  # 调用检测模型
                 boxes_temp = results[0].boxes
                 boxes = boxes_temp.xyxy.tolist()
                 names = boxes_temp.cls.tolist()
@@ -193,7 +188,7 @@ def show_pic():
             ui.label_show.setAlignment(Qt.AlignCenter)
             ui.label_show.setPixmap(pixmap)
     except Exception as e:
-        out_text('Exception：'+str(e))
+        out_text('Exception：' + str(e))
 
 
 def out_text(text):  # 输出内容至“打印输出”区域
@@ -201,10 +196,8 @@ def out_text(text):  # 输出内容至“打印输出”区域
     ui.text_output.append(timestamp + text)
 
 
-if __name__ == '__main__':
-    # train_flowers()  # 训练
-    app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
+def open_main():
+    global ui, _user_name
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()  # 显示主界面
@@ -217,6 +210,72 @@ if __name__ == '__main__':
     ui.button_playing.clicked.connect(pause_and_start)  # 将按钮button_playing绑定至函数pause_and_start
     ui.button_clean.clicked.connect(clean)  # 将按钮button_clean绑定至函数clean
     ui.button_playing.setVisible(False)  # 隐藏按钮
+    ui.label_name.setText(_translate("MainWindow", "用户："+_user_name))
+    out_text('用户【'+_user_name+'】登录成功！')
+
+
+def login():
+    global _user_name
+    user_id, ok_is_pressed = QInputDialog.getText(None, "请输入账号", "请准确输入您的账号:", QLineEdit.Normal, "")
+    if ok_is_pressed and user_id != '':
+        user_password, ok_is_pressed = QInputDialog.getText(None, "请输入密码", "请准确输入您的密码:",
+                                                            QLineEdit.Normal,
+                                                            "")
+        if ok_is_pressed and user_password != '':
+            # 连接数据库
+            con = sqlite3.connect('./source/user_data.db')
+            cursorObj = con.cursor()
+            data = (user_id, user_password)
+            try:
+                get_data = cursorObj.execute(
+                    '''SELECT name, id, password FROM user WHERE id=? AND password=?''', data)
+                # con.commit()
+                values = get_data.fetchall()
+                if values:
+                    _user_name = (values[0])[0]
+                    open_main()  # 打开主界面
+                else:
+                    QMessageBox.critical(None, "失败", '登录失败，请检查你的账号或密码是否正确',
+                                         QMessageBox.Yes, QMessageBox.Yes)
+            except Exception as e:
+                QMessageBox.critical(None, "异常", '登录系统异常：' + str(e),
+                                     QMessageBox.Yes, QMessageBox.Yes)
+
+
+def registered():
+    user_name, ok_is_pressed = QInputDialog.getText(None, "请输入姓名", "请准确输入您的姓名:", QLineEdit.Normal, "")
+    if ok_is_pressed and user_name != '':
+        user_id, ok_is_pressed = QInputDialog.getText(None, "请输入账号", "请准确输入您的账号:", QLineEdit.Normal, "")
+        if ok_is_pressed and user_id != '':
+            user_passport, ok_is_pressed = QInputDialog.getText(None, "请输入密码", "请准确输入您的密码:",
+                                                                QLineEdit.Normal,
+                                                                "")
+            if ok_is_pressed and user_passport != '':
+                # 连接数据库
+                con = sqlite3.connect('./source/user_data.db')
+                cursorObj = con.cursor()
+                # 存入数据库
+                data = (user_name, user_id, user_passport)
+                try:
+                    cursorObj.execute(
+                        '''INSERT INTO user(name, id, password) VALUES(?, ?, ?)''', data)
+                    con.commit()
+                    QMessageBox.information(None, "完成", '恭喜！' + str(user_name) + "注册成功,请前往登录",
+                                            QMessageBox.Yes, QMessageBox.Yes)
+                except Exception as e:
+                    QMessageBox.critical(None, "失败", '注册失败：' + str(e),
+                                         QMessageBox.Yes, QMessageBox.Yes)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    MainWindow = QMainWindow()
+    ui = Ui_loginWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()  # 显示登录界面
+    ui.button_login.clicked.connect(login)
+    ui.button_registered.clicked.connect(registered)
+
     timer_pic = QTimer()
     timer_pic.timeout.connect(show_pic)
     sys.exit(app.exec_())
