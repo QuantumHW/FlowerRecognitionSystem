@@ -268,7 +268,7 @@ def registered():
 
 
 if __name__ == '__main__':
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)  # 高清屏幕自适应
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
     ui = Ui_loginWindow()

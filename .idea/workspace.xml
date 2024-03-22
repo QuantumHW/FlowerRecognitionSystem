@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c1f6c3a-52b2-4815-9426-8ccf335adb68" name="更改" comment="改进网络：插入MLCA注意力机制">
+    <list default="true" id="6c1f6c3a-52b2-4815-9426-8ccf335adb68" name="更改" comment="适配高清屏幕">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -197,7 +198,7 @@
       <workItem from="1710916616394" duration="10000" />
       <workItem from="1710943114843" duration="4400000" />
       <workItem from="1711032966796" duration="23000" />
-      <workItem from="1711075372078" duration="168000" />
+      <workItem from="1711075372078" duration="2580000" />
     </task>
     <task id="LOCAL-00001" summary="First submission">
       <option name="closed" value="true" />
@@ -231,7 +232,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711075504756</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="适配高清屏幕">
+      <option name="closed" value="true" />
+      <created>1711075560112</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1711075560112</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -254,7 +263,8 @@
     <MESSAGE value="新增暂停按钮，优化输出逻辑" />
     <MESSAGE value="新增登录注册模块" />
     <MESSAGE value="改进网络：插入MLCA注意力机制" />
-    <option name="LAST_COMMIT_MESSAGE" value="改进网络：插入MLCA注意力机制" />
+    <MESSAGE value="适配高清屏幕" />
+    <option name="LAST_COMMIT_MESSAGE" value="适配高清屏幕" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/FlowerRecognitionSystem$main.coverage" NAME="main Coverage Results" MODIFIED="1710945886528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
