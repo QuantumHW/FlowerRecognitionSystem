@@ -6,7 +6,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-
+from ultralytics.nn.MLCA import MLCA
 from ultralytics.nn.modules import (
     AIFI,
     C1,
@@ -803,6 +803,7 @@ def attempt_load_one_weight(weight, device=None, inplace=True, fuse=False):
     return model, ckpt
 
 
+# 模型在此完成解析
 def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     """Parse a YOLO model.yaml dictionary into a PyTorch model."""
     import ast
@@ -872,6 +873,8 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             if m in (BottleneckCSP, C1, C2, C2f, C2fAttn, C3, C3TR, C3Ghost, C3x, RepC3):
                 args.insert(2, n)  # number of repeats
                 n = 1
+        elif m is MLCA: # 新增一个MLCA注意力机制
+            args = [ch[f], *args]
         elif m is AIFI:
             args = [ch[f], *args]
         elif m in (HGStem, HGBlock):
