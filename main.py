@@ -92,7 +92,7 @@ def open_file():
                     cur_frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     # 视频流的长和宽
                     height, width = cur_frame.shape[:2]
-                    pixmap = QImage(cur_frame, width, height, QImage.Format_RGB888)
+                    pixmap = QImage(cur_frame, width, height, width * 3, QImage.Format_RGB888)
                     pixmap = QPixmap.fromImage(pixmap)
                     # 获取是视频流和label窗口的长宽比值的最大值，适应label窗口播放，不然显示不全
                     ratio = max(width / ui.label_show.width(), height / ui.label_show.height())
@@ -179,7 +179,7 @@ def show_pic():
             cur_frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             # 视频流的长和宽
             height, width = cur_frame.shape[:2]
-            pixmap = QImage(cur_frame, width, height, QImage.Format_RGB888)
+            pixmap = QImage(cur_frame, width, height, width*3, QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(pixmap)
             # 获取是视频流和label窗口的长宽比值的最大值，适应label窗口播放，不然显示不全
             ratio = max(width / ui.label_show.width(), height / ui.label_show.height())
